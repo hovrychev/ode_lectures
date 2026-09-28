@@ -1,0 +1,789 @@
+\documentclass[aspectratio=169,11pt]{beamer}
+
+% Самостоятельный исходник: pdfLaTeX, без внешних рисунков и файлов.
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T2A]{fontenc}
+  \usepackage[utf8]{inputenc}
+\else
+  \usepackage{fontspec}
+  \setmainfont{cmunrm.otf}[BoldFont=cmunbx.otf,ItalicFont=cmunti.otf,BoldItalicFont=cmunbi.otf]
+  \setsansfont{cmunss.otf}[BoldFont=cmunsx.otf,ItalicFont=cmunsi.otf]
+  \setmonofont{cmuntt.otf}
+\fi
+\usepackage[russian]{babel}
+\usepackage{amsmath,amssymb,amsfonts,array}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta}
+
+\usetheme{Madrid}
+\usefonttheme{serif}
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{structure}{fg=blue!70!black}
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{footline}{%
+  \leavevmode\hbox{%
+  \begin{beamercolorbox}[wd=.28\paperwidth,ht=2.6ex,dp=1.2ex,center]{author in head/foot}%
+  \insertshortauthor{} (\insertshortinstitute)\end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.50\paperwidth,ht=2.6ex,dp=1.2ex,center]{title in head/foot}%
+  Обыкновенные дифференциальные уравнения\end{beamercolorbox}%
+  \begin{beamercolorbox}[wd=.22\paperwidth,ht=2.6ex,dp=1.2ex,center]{date in head/foot}%
+  Лекция 2 \quad \insertframenumber/\inserttotalframenumber\end{beamercolorbox}}}
+\newcommand{\R}{\mathbb R}
+\newcommand{\dd}{\,d}
+\title[Простейшие методы]{Обыкновенные дифференциальные уравнения}
+\subtitle{Лекция 2. Простейшие методы решения\\Автономные уравнения и метод Эйлера}
+% Лектор и место проведения курса.
+\author[Ховрычев А. А.]{Ховрычев Андрей Александрович}
+\institute[УрФУ]{ФИИТ, УрФУ}
+\date{}
+
+
+\begin{document}
+% 1
+\begin{frame}
+\titlepage
+\centering Формула, фазовая прямая и численное приближение
+\end{frame}
+
+% 2
+\begin{frame}{От проверки решения к методам его нахождения}
+На прошлой лекции: решение задаётся функцией \emph{на интервале},
+а задача Коши добавляет начальные данные.
+\begin{block}{Сегодня}
+\begin{enumerate}
+\item Разделение переменных: получить явную или неявную формулу.
+\item Фазовая прямая: понять движение без интегрирования.
+\item Интегрирующий множитель: решить линейное уравнение.
+\item Метод Эйлера: построить приближение и оценить его ограничения.
+\end{enumerate}
+\end{block}
+В примерах проверяем не только равенство, но и область определения,
+постоянные решения, начальное условие и поведение при больших временах.
+\end{frame}
+
+\section{Разделение переменных}
+% 3
+\begin{frame}{Самый простой случай: $x'=g(t)$}
+Пусть $g$ непрерывна на интервале $J$ и $t_0\in J$.
+Тогда задача
+\[
+x'=g(t),\qquad x(t_0)=x_0
+\]
+имеет решение
+\[
+\boxed{x(t)=x_0+\int_{t_0}^{t}g(s)\,ds},\qquad t\in J.
+\]
+По формуле Ньютона--Лейбница производная равна $g(t)$.
+Если $x_1,x_2$ --- два решения, то $(x_1-x_2)'=0$;
+при одинаковых начальных данных разность равна нулю.
+\begin{exampleblock}{Пример}
+$x'=2t$, $x(1)=0$ дают $x(t)=t^2-1$.
+\end{exampleblock}
+\end{frame}
+
+% 4
+\begin{frame}{Уравнение с разделяющимися переменными}
+\begin{block}{Определение}
+Уравнение допускает \alert{разделение переменных}, если имеет вид
+\[
+x'=g(t)q(x).
+\]
+Пусть $g$ непрерывна на $J$, а $q$ непрерывна и не равна нулю
+на интервале $U$, содержащем $x_0$.
+\end{block}
+Для решения с $x(t_0)=x_0$, пока $x(t)\in U$, получаем
+\[
+\boxed{\int_{x_0}^{x(t)}\frac{du}{q(u)}
+=\int_{t_0}^{t}g(s)\,ds}.
+\]
+Нули $q$ требуют отдельного рассмотрения: делить на $q(x)$ там нельзя.
+\end{frame}
+
+% 5
+\begin{frame}{Почему разделение переменных работает?}
+Положим
+\[
+H(x)=\int_{x_0}^x\frac{du}{q(u)},\qquad
+G(t)=\int_{t_0}^t g(s)\,ds.
+\]
+Вдоль решения по цепному правилу
+\[
+\frac{d}{dt}H(x(t))=\frac{x'(t)}{q(x(t))}=g(t)=G'(t).
+\]
+Значит, $H(x(t))=G(t)$: константа равна нулю при $t=t_0$.
+\begin{block}{Обратный переход}
+$H'(x)=1/q(x)\ne0$, поэтому $H$ строго монотонна на $U$
+и имеет дифференцируемую обратную.
+Функция $x(t)=H^{-1}(G(t))$ решает задачу там, где $G(t)\in H(U)$.
+\end{block}
+\end{frame}
+
+% 6
+\begin{frame}{Разделение переменных: порядок действий}
+\begin{enumerate}
+\item Найти нули $q(a)=0$ и записать постоянные решения $x(t)\equiv a$.
+\item На каждом интервале $q(x)\ne0$ интегрировать:
+\[
+\int\frac{dx}{q(x)}=\int g(t)\,dt+C.
+\]
+\item Использовать начальные данные, выбрать нужную ветвь.
+\item Указать интервал решения и проверить результат подстановкой.
+\end{enumerate}
+\begin{alertblock}{Логическая оговорка}
+Без единственности возможны склейки постоянных и непостоянных частей.
+Список «постоянные решения плюс формулы на $q\ne0$»
+не всегда исчерпывает все решения.
+\end{alertblock}
+\end{frame}
+
+% 7
+\begin{frame}{Пример: экспонента с переменным темпом}
+\[
+x'=2tx,\qquad x(0)=x_0.
+\]
+На участке $x\ne0$:
+\[
+\frac{dx}{x}=2t\,dt,\qquad \ln|x|=t^2+C,
+\qquad x=Ae^{t^2},\quad A\ne0.
+\]
+При $x_0=0$ отдельно получаем $x\equiv0$.
+В итоге
+\[
+\boxed{x(t)=x_0e^{t^2}},\qquad t\in\R.
+\]
+\begin{block}{Проверка полноты}
+$\bigl(e^{-t^2}x(t)\bigr)'=0$ для любого решения.
+Поэтому других решений нет, включая случай $x_0=0$.
+\end{block}
+\end{frame}
+
+% 8
+\begin{frame}{Пример: формула и её максимальный интервал}
+\[
+x'=x^2,\qquad x(0)=x_0.
+\]
+При $x_0\ne0$ разделение даёт
+\[
+-\frac1x=t-\frac1{x_0},\qquad
+\boxed{x(t)=\frac{x_0}{1-x_0t}}.
+\]
+\[
+I_{\max}=
+\begin{cases}
+(-\infty,1/x_0),&x_0>0,\\
+(1/x_0,+\infty),&x_0<0.
+\end{cases}
+\]
+При $x_0=0$ решение $x\equiv0$ определено на всей $\R$.
+\begin{alertblock}{Выбор интервала}
+Берём компоненту области формулы, содержащую начальный момент $0$.
+В полюсе конечное непрерывное продолжение невозможно.
+\end{alertblock}
+\end{frame}
+
+% 9
+\begin{frame}{Неявная формула тоже описывает решение}
+\[
+x'=\frac{t}{1+x^2},\qquad x(0)=0.
+\]
+Умножая на $1+x^2$ и интегрируя, получаем
+\[
+\boxed{x+\frac{x^3}{3}=\frac{t^2}{2}}.
+\]
+Функция $H(x)=x+x^3/3$ строго возрастает, поскольку $H'=1+x^2>0$,
+и отображает $\R$ на $\R$.
+\begin{block}{Что можно заключить без формулы для корня кубического уравнения?}
+Для каждого $t\in\R$ значение $x(t)$ определяется однозначно.
+Решение существует на всей $\R$, чётно, неотрицательно
+и возрастает при $t>0$.
+\end{block}
+\end{frame}
+
+% 10
+\begin{frame}{Деление может скрыть часть движения}
+Для $x'=2\sqrt{|x|}$, $x(0)=0$ из первой лекции известны решения
+\[
+x_a(t)=
+\begin{cases}
+0,&t\le a,\\
+(t-a)^2,&t>a,
+\end{cases}
+\qquad a\ge0.
+\]
+Разделение на участке $x>0$ даёт $\sqrt{x}=t-a$,
+то есть только часть при $t>a$.
+\begin{alertblock}{Условие важно}
+Если $q$ лишь непрерывна, решение может прийти в нуль $q$
+или покинуть его. При $q\in C^1$ локальная единственность
+исключает такое поведение; доказательство --- в лекции 3.
+\end{alertblock}
+\end{frame}
+
+\section{Автономные уравнения на прямой}
+% 11
+\begin{frame}{Автономность: закон не зависит от часов}
+Рассмотрим $x'=q(x)$; в этом разделе предполагаем $q\in C^1$.
+\begin{itemize}
+\item Нули $q$ задают равновесия.
+\item На интервалах $q>0$ решения возрастают, на интервалах $q<0$ убывают.
+\item Непостоянное решение не проходит через равновесие
+при выполнении локальной единственности.
+\end{itemize}
+\begin{block}{Сдвиг времени}
+Если $\varphi(t)$ --- решение на $I$, то $\psi(t)=\varphi(t+c)$
+--- решение на $I-c$:
+\[
+\psi'(t)=q(\varphi(t+c))=q(\psi(t)).
+\]
+\end{block}
+Здесь используем локальную единственность для $C^1$-поля;
+её обоснование будет дано в следующей лекции.
+\end{frame}
+
+% 12
+\begin{frame}{Как читать фазовую прямую}
+\begin{enumerate}
+\item Отметить нули $q$.
+\item Определить знак $q$ между соседними нулями.
+\item Поставить стрелки: вправо при $q>0$, влево при $q<0$.
+\end{enumerate}
+\begin{block}{О пределе решения}
+Если решение существует при всех $t\ge0$ и $x(t)\to\ell\in\R$,
+где $\ell$ лежит внутри области $q$, то $q(\ell)=0$.
+\end{block}
+Действительно, при $q(\ell)>0$ вблизи $\ell$ было бы $x'\ge c>0$,
+что несовместимо с конечным пределом. Случай $q(\ell)<0$ аналогичен.
+\medskip
+
+Для решения, запертого в компактном отрезке области $C^1$-поля,
+продолжимость вперёд будет обоснована в лекции 5.
+\end{frame}
+
+% 13
+\begin{frame}{Поведение вблизи изолированного равновесия}
+\begin{center}
+\begin{tikzpicture}[>=Stealth,x=1cm,y=1cm]
+\foreach \y in {0,1.1,2.2}{
+\draw[gray] (-2,\y)--(2,\y);
+\fill (0,\y) circle (2pt);
+}
+\draw[blue!75!black,thick,->] (-1.8,2.2)--(-.4,2.2);
+\draw[blue!75!black,thick,->] (1.8,2.2)--(.4,2.2);
+\node[right] at (2.3,2.2) {Притягивает с обеих сторон};
+\draw[red!75!black,thick,->] (-.4,1.1)--(-1.8,1.1);
+\draw[red!75!black,thick,->] (.4,1.1)--(1.8,1.1);
+\node[right] at (2.3,1.1) {Отталкивает с обеих сторон};
+\draw[teal!75!black,thick,->] (-1.8,0)--(-.4,0);
+\draw[teal!75!black,thick,->] (.4,0)--(1.8,0);
+\node[right] at (2.3,0) {Притягивает только слева};
+\end{tikzpicture}
+\end{center}
+Если $q(a)=0$, то $q'(a)<0$ даёт первый случай,
+$q'(a)>0$ --- второй. При $q'(a)=0$ нужно исследовать знаки.
+\begin{block}{Терминология}
+Первый случай --- асимптотически устойчивое равновесие;
+второй --- неустойчивое. Третий называют полуустойчивым,
+но на всей прямой оно неустойчиво по Ляпунову.
+\end{block}
+\end{frame}
+
+% 14
+\begin{frame}{Пример: три равновесия}
+\[
+x'=x(1-x^2),\qquad q'(x)=1-3x^2.
+\]
+\begin{center}
+\begin{tikzpicture}[>=Stealth,x=2cm]
+\draw[->] (-2,0)--(2.1,0) node[right] {$x$};
+\foreach \a in {-1,0,1} \fill (\a,0) circle (2pt) node[below=4pt] {$\a$};
+\draw[blue!75!black,very thick,->] (-1.85,0)--(-1.2,0);
+\draw[blue!75!black,very thick,->] (-.15,0)--(-.8,0);
+\draw[blue!75!black,very thick,->] (.15,0)--(.8,0);
+\draw[blue!75!black,very thick,->] (1.85,0)--(1.2,0);
+\foreach \x/\s in {-1.5/+, -.5/-, .5/+, 1.5/-} \node at (\x,.4) {$\s$};
+\end{tikzpicture}
+\end{center}
+\begin{itemize}
+\item $-1$ и $1$ притягивают; $0$ отталкивает.
+\item При $x_0>0$ решение стремится к $1$, при $x_0<0$ --- к $-1$.
+\item При $x_0=0$ решение остаётся в нуле.
+\end{itemize}
+Непостоянные решения здесь монотонны: периодических колебаний нет.
+\end{frame}
+
+% 15
+\begin{frame}{Логистическая модель: ограниченный рост}
+Экспоненциальная модель $x'=rx$ предполагает постоянный
+темп роста на одну особь. Учтём ограниченность ресурсов:
+\[
+\frac{x'}x=r\left(1-\frac{x}{K}\right),\qquad x>0.
+\]
+Получаем
+\[
+\boxed{x'=rx\left(1-\frac{x}{K}\right)},\qquad r>0,\quad K>0.
+\]
+\begin{itemize}
+\item $r$ --- темп роста при малой численности, размерность $1/\text{время}$.
+\item $K$ --- ёмкость среды, размерность численности.
+\item Биологическая область: $x\ge0$; $x=0$ проверяем отдельно.
+\end{itemize}
+Это непрерывная модель численности с неизменными параметрами среды.
+\end{frame}
+
+% 16
+\begin{frame}{Логистическая модель: сначала геометрия}
+\begin{center}
+\begin{tikzpicture}[>=Stealth,x=1.5cm]
+\draw[->] (-1.6,0)--(4.8,0) node[right] {$x$};
+\fill (0,0) circle (2pt) node[below] {$0$};
+\fill (3,0) circle (2pt) node[below] {$K$};
+\draw[gray,thick,->] (-.2,0)--(-1.3,0);
+\draw[blue!75!black,very thick,->] (.4,0)--(2.6,0);
+\draw[blue!75!black,very thick,->] (4.4,0)--(3.4,0);
+\node at (-.8,.4) {$-$}; \node at (1.5,.4) {$+$}; \node at (3.9,.4) {$-$};
+\end{tikzpicture}
+\end{center}
+\begin{itemize}
+\item $0<x_0<K$: численность растёт, оставаясь ниже $K$.
+\item $x_0>K$: численность убывает, оставаясь выше $K$.
+\item $x_0=0$ и $x_0=K$: постоянные решения.
+\end{itemize}
+\begin{block}{Прогноз}
+При любом $x_0>0$ ожидаем $x(t)\to K$ при $t\to+\infty$.
+Теперь подтвердим и глобальность вперёд, и предел явной формулой.
+\end{block}
+\end{frame}
+
+% 17
+\begin{frame}{Логистическое уравнение: разделяем переменные}
+На участках $x\ne0,K$:
+\[
+\frac{dx}{x(1-x/K)}=r\,dt,\qquad
+\frac{1}{x(1-x/K)}=\frac1x+\frac1{K-x}.
+\]
+Поэтому
+\[
+\ln|x|-\ln|K-x|=rt+C,\qquad
+\frac{x}{K-x}=Be^{rt}.
+\]
+После подстановки $x(0)=x_0>0$ и разрешения относительно $x$:
+\[
+\boxed{x(t)=\frac{K}{1+\left(K/x_0-1\right)e^{-rt}}}.
+\]
+Полученная формула также включает $x_0=K$ после отдельной проверки.
+Решение $x\equiv0$ записываем отдельно.
+\end{frame}
+
+% 18
+\begin{frame}{Логистическая формула: область и предел}
+Обозначим $A=K/x_0-1$, где $x_0>0$.
+\[
+x(t)=\frac{K}{1+Ae^{-rt}}.
+\]
+\begin{itemize}
+\item Если $0<x_0<K$, то $A>0$: знаменатель положителен на всей $\R$.
+\item Если $x_0=K$, то $A=0$: решение постоянно.
+\item Если $x_0>K$, то $-1<A<0$: для $t\ge0$ знаменатель
+не меньше $1+A=K/x_0>0$.
+\end{itemize}
+Во всех трёх случаях решение определено при всех $t\ge0$ и
+\[
+\lim_{t\to+\infty}x(t)=K.
+\]
+\alert{В прошлое} при $x_0>K$ есть полюс:
+$t_*=\frac1r\ln(1-K/x_0)<0$; максимальный интервал --- $(t_*,+\infty)$.
+\end{frame}
+
+% 19
+\begin{frame}{Семейство логистических кривых}
+\begin{columns}[c]
+\begin{column}{.59\textwidth}
+\centering
+\begin{tikzpicture}[x=1.05cm,y=2.05cm,>=Stealth]
+\draw[->] (-.2,0)--(5.2,0) node[right] {$rt$};
+\draw[->] (0,-.1)--(0,1.95) node[above] {$x/K$};
+\draw[dashed,gray] (0,1)--(4.8,1) node[right] {$1$};
+\draw[dotted,gray] (0,.5)--(4.8,.5);
+\node[left] at (0,.5) {$1/2$};
+\foreach \a in {.1,.3,.7,1.7}{
+\draw[blue!70!black,thick,domain=0:4.8,samples=90]
+plot (\x,{1/(1+(1/\a-1)*exp(-\x))});
+}
+\draw[teal!70!black,thick] (0,1)--(4.8,1);
+\end{tikzpicture}
+\end{column}
+\begin{column}{.39\textwidth}
+При $0<x<K$:
+\[
+x''=r(1-2x/K)x'.
+\]
+Скорость роста максимальна при $x=K/2$:
+\[
+x'_{\max}=\frac{rK}{4}.
+\]
+Если $x_0<K/2$, впереди есть точка перегиба.
+Если $x_0>K$, решение убывает к $K$.
+\end{column}
+\end{columns}
+\end{frame}
+
+% 20
+\begin{frame}{Когда популяция достигнет заданного уровня?}
+Пусть $x_0=K/4$. Тогда
+\[
+x(t)=\frac{K}{1+3e^{-rt}}.
+\]
+Найдём время достижения $3K/4$:
+\[
+\frac34=\frac{1}{1+3e^{-rt}}
+\quad\Longleftrightarrow\quad e^{-rt}=\frac19,
+\qquad \boxed{t=\frac{\ln9}{r}}.
+\]
+\begin{block}{Интерпретация}
+Время обратно пропорционально $r$.
+Параметр $K$ сократился, поскольку заданы доли ёмкости среды.
+\end{block}
+Уровень $K$ достигается лишь в пределе, если $x_0\ne K$.
+\end{frame}
+
+\section{Линейные уравнения первого порядка}
+% 21
+\begin{frame}{Линейность --- другой путь к явному решению}
+\begin{block}{Определение}
+Линейное уравнение первого порядка:
+\[
+\boxed{x'+a(t)x=b(t)},
+\]
+где $a,b$ непрерывны на интервале $J$.
+При $b\equiv0$ оно называется однородным.
+\end{block}
+Неизвестная и её производная входят линейно;
+коэффициенты могут зависеть от времени.
+\[
+x'+tx=\sin t\quad\text{--- линейное},\qquad
+x'=x^2\quad\text{--- нелинейное}.
+\]
+Не всякое линейное уравнение разделяется на множители $g(t)q(x)$.
+\end{frame}
+
+% 22
+\begin{frame}{Как найти интегрирующий множитель?}
+Хотим превратить левую часть в производную произведения:
+\[
+(\mu x)'=\mu x'+\mu'x=\mu(x'+ax).
+\]
+Для этого достаточно $\mu'=a\mu$. Возьмём
+\[
+\mu(t)=\exp\left(\int_{t_0}^t a(s)\,ds\right)>0,\qquad \mu(t_0)=1.
+\]
+Умножая уравнение на $\mu$, получаем
+\[
+\boxed{(\mu x)'=\mu b}.
+\]
+\begin{block}{Почему преобразование эквивалентно?}
+$\mu$ нигде не обращается в нуль, поэтому можно и умножить на неё,
+и разделить обратно, не теряя решений.
+\end{block}
+\end{frame}
+
+% 23
+\begin{frame}{Формула решения линейной задачи Коши}
+Интегрируя $(\mu x)'=\mu b$ от $t_0$ до $t$, получаем
+\[
+\mu(t)x(t)-x_0=\int_{t_0}^t\mu(s)b(s)\,ds.
+\]
+Следовательно,
+\[
+\boxed{x(t)=\frac1{\mu(t)}
+\left[x_0+\int_{t_0}^t\mu(s)b(s)\,ds\right]},\qquad t\in J.
+\]
+\begin{block}{Существование и единственность уже доказаны}
+Правая часть определена и дифференцируема на всём $J$,
+удовлетворяет уравнению и начальному условию.
+Любое решение обязано иметь эту форму.
+\end{block}
+Интегралы не обязаны выражаться через элементарные функции.
+\end{frame}
+
+% 24
+\begin{frame}{Возвращаемся к полю $x'=t-x$}
+\[
+x'+x=t,\qquad x(0)=x_0,\qquad \mu(t)=e^t.
+\]
+Тогда
+\[
+(e^tx)'=te^t,\qquad
+\int_0^t se^s\,ds=(t-1)e^t+1.
+\]
+Отсюда
+\[
+\boxed{x(t)=t-1+(x_0+1)e^{-t}},\qquad t\in\R.
+\]
+\begin{itemize}
+\item $t-1$ --- частное решение неоднородного уравнения.
+\item $(x_0+1)e^{-t}$ --- затухающее решение однородного уравнения.
+\item Разность любых двух решений имеет вид $Ce^{-t}$.
+\end{itemize}
+Это семейство мы видели на рисунке в первой лекции.
+\end{frame}
+
+% 25
+\begin{frame}{Как выбрать метод?}
+\renewcommand{\arraystretch}{1.5}
+\begin{tabular}{>{\raggedright\arraybackslash}p{.28\textwidth}
+>{\raggedright\arraybackslash}p{.29\textwidth}
+>{\raggedright\arraybackslash}p{.33\textwidth}}
+\textbf{Вид} & \textbf{Первый шаг} & \textbf{Что проверить} \\
+$x'=g(t)$ & Интегрирование & Начальное условие \\
+$x'=g(t)q(x)$ & Разделение & Нули $q$, ветви, интервал \\
+$x'=q(x)$ & Фазовая прямая & Равновесия, знаки, продолжимость \\
+$x'+a(t)x=b(t)$ & Множитель $\mu$ & Непрерывность коэффициентов \\
+Общее $x'=f(t,x)$ & Численное приближение & Шаг и ошибка
+\end{tabular}
+\medskip
+
+Одно уравнение может относиться к нескольким строкам.
+Например, $x'=-kx$ и линейно, и автономно, и разделяется.
+\end{frame}
+
+\section{Метод Эйлера}
+% 26
+\begin{frame}{От касательной к пошаговому алгоритму}
+Для задачи $x'=f(t,x)$, $x(t_0)=x_0$ выберем шаг $h>0$.
+Пусть $t_n=t_0+nh$, а $X_n$ --- приближение к $x(t_n)$.
+\[
+\boxed{X_0=x_0,\qquad X_{n+1}=X_n+h f(t_n,X_n)}.
+\]
+\begin{enumerate}
+\item Вычислить наклон в текущей приближённой точке $(t_n,X_n)$.
+\item Пройти время $h$ вдоль соответствующей прямой.
+\item Повторить с новым значением $X_{n+1}$.
+\end{enumerate}
+\begin{alertblock}{Различаем обозначения}
+$x(t_n)$ --- точное значение; $X_n$ --- вычисленное.
+Наклон на следующем шаге берётся в приближённой точке.
+\end{alertblock}
+\end{frame}
+
+% 27
+\begin{frame}{Ломаная Эйлера для $x'=-x$, $x(0)=1$}
+\begin{columns}[c]
+\begin{column}{.61\textwidth}
+\centering
+\begin{tikzpicture}[x=2cm,y=2.6cm,>=Stealth]
+\draw[->] (-.12,0)--(2.5,0) node[right] {$t$};
+\draw[->] (0,-.08)--(0,1.2) node[above] {$x$};
+\draw[blue!75!black,very thick,domain=0:2.25,samples=70] plot (\x,{exp(-\x)});
+\draw[red!75!black,thick] (0,1)--(.5,.5)--(1,.25)--(1.5,.125)--(2,.0625);
+\foreach \t/\y in {0/1,.5/.5,1/.25,1.5/.125,2/.0625}{
+\fill[red!75!black] (\t,\y) circle (1.5pt);
+}
+\foreach \t in {.5,1,1.5,2} \node[below] at (\t,0) {\scriptsize $\t$};
+\node[left] at (0,1) {$1$};
+\end{tikzpicture}
+\end{column}
+\begin{column}{.37\textwidth}
+При $h=1/2$:
+\[
+X_{n+1}=\tfrac12X_n,\qquad X_n=2^{-n}.
+\]
+Синяя кривая: $e^{-t}$.
+
+Красная ломаная: метод Эйлера.
+\medskip
+
+У ломаной обычно есть изломы; она не является классическим решением ОДУ.
+\end{column}
+\end{columns}
+\end{frame}
+
+% 28
+\begin{frame}{Численный эксперимент: уменьшаем шаг}
+Для $x'=-x$, $x(0)=1$, в точке $T=1$:
+\[
+X_N=(1-h)^N,\qquad Nh=1,\qquad x(1)=e^{-1}\approx0.367879.
+\]
+\begin{center}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{c r r r}
+$h$ & $N$ & $X_N$ & $|X_N-x(1)|$\\ \hline
+$0.2$ & 5 & $0.327680$ & $0.040199$\\
+$0.1$ & 10 & $0.348678$ & $0.019201$\\
+$0.05$ & 20 & $0.358486$ & $0.009394$\\
+$0.025$ & 40 & $0.363232$ & $0.004647$
+\end{tabular}
+\end{center}
+При делении шага пополам ошибка здесь уменьшается примерно вдвое.
+\begin{block}{Наблюдение и теорема}
+Таблица подсказывает порядок $O(h)$, но один эксперимент не доказывает его
+для произвольного уравнения.
+\end{block}
+\end{frame}
+
+% 29
+\begin{frame}{Ошибка одного шага и накопленная ошибка}
+Пусть точное решение дважды дифференцируемо и $|x''|\le M$
+на фиксированном отрезке $[t_0,T]$.
+Остаток шага, начатого с \emph{точного} значения:
+\[
+\delta_n=x(t_{n+1})-x(t_n)-h f(t_n,x(t_n)),\qquad
+|\delta_n|\le\frac{M}{2}h^2.
+\]
+\begin{block}{Два разных порядка}
+Ошибка одного шага $\delta_n$ имеет порядок $O(h^2)$.
+Глобальная ошибка $e_n=x(t_n)-X_n$ при условии Липшица по $x$
+на общей области имеет порядок $O(h)$ на фиксированном отрезке.
+\end{block}
+Шагов порядка $1/h$; ошибки переносятся и накапливаются.
+Оценка относится к точной арифметике и требует оставаться в области,
+где действуют гипотезы.
+\end{frame}
+
+% 30
+\begin{frame}{Дополнение: от локальной ошибки к глобальной}
+\small
+Пусть на $[t_0,T]\times\R$ выполнено
+$|f(t,u)-f(t,v)|\le L|u-v|$, а $|x''|\le M$ вдоль точного решения.
+Тогда
+\[
+e_{n+1}=e_n+h\bigl(f(t_n,x(t_n))-f(t_n,X_n)\bigr)+\delta_n,
+\]
+\[
+|e_{n+1}|\le(1+hL)|e_n|+\frac M2h^2,\qquad e_0=0.
+\]
+При $L>0$ сумма геометрической прогрессии даёт
+\[
+|e_n|\le\frac{Mh}{2L}\bigl((1+hL)^n-1\bigr)
+\le\boxed{\frac{Mh}{2L}\bigl(e^{L(T-t_0)}-1\bigr)}.
+\]
+При $L=0$: $|e_n|\le Mh(T-t_0)/2$.
+\begin{alertblock}{Граница вывода}
+$T$ фиксировано. Эта оценка не обещает точности при $t\to+\infty$
+для фиксированного шага. Доказательство можно разобрать на практике.
+\end{alertblock}
+\end{frame}
+
+% 31
+\begin{frame}{Слишком большой шаг меняет качественную картину}
+Для $x'=-kx$, $k>0$, точное решение $x_0e^{-kt}$ затухает.
+Метод Эйлера даёт
+\[
+X_n=(1-hk)^n x_0.
+\]
+При $x_0\ne0$:
+\[
+\boxed{X_n\to0\quad\Longleftrightarrow\quad |1-hk|<1
+\quad\Longleftrightarrow\quad 0<hk<2}.
+\]
+\begin{itemize}
+\item $0<hk<1$: знак сохраняется, модуль убывает.
+\item $hk=1$: после одного шага все значения равны нулю.
+\item $1<hk<2$: затухающие колебания знака.
+\item $hk=2$: незатухающие колебания; $hk>2$: рост модуля.
+\end{itemize}
+\alert{Затухание сеточного решения ещё не гарантирует хорошую точность.}
+\end{frame}
+
+% 32
+\begin{frame}{Одно уравнение --- разное поведение сетки}
+\begin{columns}[c]
+\begin{column}{.60\textwidth}
+\centering
+\begin{tikzpicture}[x=.6cm,y=1.2cm,>=Stealth]
+\draw[->] (-.2,0)--(8.6,0) node[right] {$t$};
+\draw[->] (0,-1.7)--(0,1.85) node[above] {$x$};
+\draw[blue!75!black,very thick,domain=0:8,samples=70] plot (\x,{exp(-\x)});
+\draw[teal!75!black,thick] (0,1)--(1.5,-.5)--(3,.25)--(4.5,-.125)--(6,.0625)--(7.5,-.03125);
+\draw[red!75!black,thick] (0,1)--(2.2,-1.2)--(4.4,1.44)--(6.6,-1.728);
+\foreach \t/\y in {0/1,2.2/-1.2,4.4/1.44,6.6/-1.728}
+\fill[red!75!black] (\t,\y) circle (1.7pt);
+\foreach \t in {2,4,6,8} \node[below] at (\t,0) {\scriptsize $\t$};
+\node[left] at (0,1) {$1$}; \node[left] at (0,-1) {$-1$};
+\end{tikzpicture}
+\end{column}
+\begin{column}{.38\textwidth}
+Задача: $x'=-x$, $x(0)=1$.
+\medskip
+
+{\color{blue!75!black}Синяя кривая}: точное решение.
+\medskip
+
+{\color{teal!75!black}Зелёная ломаная}: $h=1.5$, затухает со сменой знака.
+\medskip
+
+{\color{red!75!black}Красная ломаная}: $h=2.2$, модуль растёт.
+\end{column}
+\end{columns}
+\end{frame}
+
+% 33
+\begin{frame}{Проверьте себя: что именно даёт каждый метод?}
+\begin{enumerate}
+\item Какое решение теряется при делении уравнения $x'=x^2$ на $x^2$?
+\item Может ли непостоянное решение $x'=q(x)$, $q\in C^1$,
+быть периодическим?
+\item Достигает ли логистическое решение уровня $K$ за конечное время,
+если $0<x_0<K$?
+\item Почему интегрирующий множитель не теряет решения?
+\item Почему $O(h^2)$ за один шаг не означает $O(h^2)$ на всём отрезке?
+\item Для $x'=-10x$ шаг $h=0.3$ даёт затухание или рост?
+\end{enumerate}
+\begin{block}{К следующей лекции}
+Мы получили методы и примеры. Теперь нужны общие условия
+существования и единственности решения задачи Коши.
+\end{block}
+\end{frame}
+
+% 34
+\begin{frame}{Упражнения A: техника и проверка}
+\begin{enumerate}
+\item Решите $x'=2t(1+x^2)$, $x(0)=0$.
+Укажите максимальный интервал и проверьте решение.
+\item Найдите все решения $x'=3t(x-2)^2$.
+Не забудьте постоянные решения и интервалы определения.
+\item Постройте фазовые прямые для $x'=x^2$,
+$x'=x^3$ и $x'=-x^3$. Что показывает сравнение при $q'(0)=0$?
+\item Решите $x'+2x=4$, $x(0)=1$.
+Найдите предел при $t\to+\infty$ двумя способами.
+\item Решите $x'+(2/t)x=t$, $x(1)=0$.
+На каком максимальном интервале определено это решение исходного уравнения?
+\end{enumerate}
+\end{frame}
+
+% 35
+\begin{frame}{Упражнения B: модель, геометрия, вычисление}
+\small
+\begin{enumerate}
+\setcounter{enumi}{5}
+\item В логистической модели $K=1000$, $x(0)=100$, $x(2)=250$.
+Время измеряется в днях. Найдите $r$ и время достижения $x=500$.
+\item Для $x'=-2x$, $x(0)=1$ выполните два шага Эйлера при $h=0.25$.
+Сравните результат в $t=0.5$ с точным значением.
+При каких шагах сеточное решение затухает? При каких остаётся положительным?
+\item Для $x'=x(1-x)$, $x(0)=2$, шаг $h=2$ даёт $X_1=-2$.
+Объясните, почему это противоречит качественному поведению точного решения.
+Какое условие на $h$ обеспечивает хотя бы $X_1\ge0$?
+\item Для $x'=x^2$, $x(0)=1$ метод Эйлера с шагом $1/N$
+выдаёт конечное число $X_N$ в момент $t=1$.
+Почему это не доказывает существования $x(1)$?
+\end{enumerate}
+\end{frame}
+
+% 36
+\begin{frame}{Классические ориентиры и дальнейшее чтение}
+Материалы MIT OpenCourseWare, курс 18.03SC:
+\begin{itemize}
+\item \href{https://ocw.mit.edu/courses/18-03sc-differential-equations-fall-2011/pages/unit-i-first-order-differential-equations/basic-de-and-separable-equations/}{Basic DE's and Separable Equations}.
+\item \href{https://ocw.mit.edu/courses/18-03sc-differential-equations-fall-2011/pages/unit-i-first-order-differential-equations/first-order-autonomous-differential-equations/}{First Order Autonomous Differential Equations}.
+\item \href{https://ocw.mit.edu/courses/18-03sc-differential-equations-fall-2011/pages/unit-i-first-order-differential-equations/solution-by-integrating-factors/}{Solution by Integrating Factors}.
+\item \href{https://ocw.mit.edu/courses/18-03sc-differential-equations-fall-2011/pages/unit-i-first-order-differential-equations/numerical-methods/}{Numerical Methods}.
+\end{itemize}
+\begin{block}{Как пользоваться}
+Сопоставляйте вычисления с фазовой прямой и численным экспериментом.
+Подробные комментарии, решения упражнений и ссылки на конспекты:
+\texttt{lecture2-script.md}.
+\end{block}
+Эта лекция --- самостоятельное изложение для нашего курса, не перевод MIT.
+\end{frame}
+\end{document}
